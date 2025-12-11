@@ -50,6 +50,10 @@ jobs:
         run: |
           cargo makepad wasm --bindgen build -p moly --release
 
+      - name: Add .nojekyll for GitHub Pages
+        run: |
+          touch target/makepad-wasm-app/release/moly/.nojekyll
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
