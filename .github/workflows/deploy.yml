@@ -60,7 +60,8 @@ jobs:
             # We search for key files to identify the directories
             
             # Platform files
-            PLATFORM_SRC=$(find makepad -name web_gl.js -type f | head -n 1)
+            # Exclude platform2 as it is unstable
+            PLATFORM_SRC=$(find makepad -name web_gl.js -not -path "*/platform2/*" -type f | head -n 1)
             if [ -n "$PLATFORM_SRC" ]; then
               PLATFORM_DIR=$(dirname "$PLATFORM_SRC")
               echo "Found platform source at $PLATFORM_DIR"
