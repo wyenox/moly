@@ -82,6 +82,53 @@ jobs:
             else
               echo "ERROR: Could not find wasm_bridge.js in makepad checkout"
             fi
+
+            # Moly-kit resources
+            if [ -d "moly-kit/resources" ]; then
+              echo "Copying moly-kit resources..."
+              mkdir -p target/makepad-wasm-app/release/moly/moly_kit/resources
+              cp -r moly-kit/resources/* target/makepad-wasm-app/release/moly/moly_kit/resources/
+            else
+               echo "WARNING: moly-kit/resources not found"
+            fi
+
+            # Makepad Widgets resources
+            WIDGETS_RES=$(find makepad -path "*/widgets/resources" -type d | head -n 1)
+            if [ -n "$WIDGETS_RES" ]; then
+               echo "Copying makepad-widgets resources from $WIDGETS_RES..."
+               mkdir -p target/makepad-wasm-app/release/moly/makepad_widgets/resources
+               cp -r "$WIDGETS_RES"/* target/makepad-wasm-app/release/moly/makepad_widgets/resources/
+            fi
+
+            # Fonts (Emoji)
+            EMOJI_FONT=$(find makepad -name NotoColorEmoji.ttf -type f | head -n 1)
+            if [ -n "$EMOJI_FONT" ]; then
+               EMOJI_DIR=$(dirname "$EMOJI_FONT")
+               echo "Copying emoji font from $EMOJI_DIR..."
+               mkdir -p target/makepad-wasm-app/release/moly/makepad_fonts_emoji/resources
+               cp "$EMOJI_FONT" target/makepad-wasm-app/release/moly/makepad_fonts_emoji/resources/
+            fi
+
+            # Fonts (Chinese) - Find one and assume structure or find all
+            # We need to handle multiple chinese fonts: bold, regular, etc.
+            # They seem to be in separate crates/folders in target, but might be in one place in source.
+            
+            # LXGWWenKaiBold.ttf -> makepad_fonts_chinese_bold
+            CN_BOLD=$(find makepad -name LXGWWenKaiBold.ttf -type f | head -n 1)
+            if [ -n "$CN_BOLD" ]; then
+               echo "Copying Chinese Bold font..."
+               mkdir -p target/makepad-wasm-app/release/moly/makepad_fonts_chinese_bold/resources
+               cp "$CN_BOLD" target/makepad-wasm-app/release/moly/makepad_fonts_chinese_bold/resources/
+            fi
+
+            # LXGWWenKaiRegular.ttf -> makepad_fonts_chinese_regular
+            CN_REG=$(find makepad -name LXGWWenKaiRegular.ttf -type f | head -n 1)
+            if [ -n "$CN_REG" ]; then
+               echo "Copying Chinese Regular font..."
+               mkdir -p target/makepad-wasm-app/release/moly/makepad_fonts_chinese_regular/resources
+               cp "$CN_REG" target/makepad-wasm-app/release/moly/makepad_fonts_chinese_regular/resources/
+            fi
+
           else
             echo "Resources appear to be present."
           fi
