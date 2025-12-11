@@ -46,16 +46,44 @@ jobs:
         run: |
           cargo install --path makepad/tools/cargo_makepad
 
-      - name: Patch Cargo.toml to use local makepad
-        run: |
-          echo "" >> Cargo.toml
-          echo "[patch.'https://github.com/wyeworks/makepad']" >> Cargo.toml
-          echo "makepad-widgets = { path = 'makepad/widgets' }" >> Cargo.toml
-          echo "makepad-code-editor = { path = 'makepad/code_editor' }" >> Cargo.toml
-
       - name: Build WASM app
         run: |
           cargo makepad wasm --bindgen build -p moly --release
+
+      - name: Verify and Fix Missing Resources
+        run: |
+          # Check if critical files exist
+          if [ ! -f target/makepad-wasm-app/release/moly/makepad_platform/web_gl.js ]; then
+            echo "WARNING: makepad_platform/web_gl.js missing. Attempting manual copy..."
+            
+            # Locate source directories in the checked out makepad repo
+            # We search for key files to identify the directories
+            
+            # Platform files
+            PLATFORM_SRC=$(find makepad -name web_gl.js -type f | head -n 1)
+            if [ -n "$PLATFORM_SRC" ]; then
+              PLATFORM_DIR=$(dirname "$PLATFORM_SRC")
+              echo "Found platform source at $PLATFORM_DIR"
+              mkdir -p target/makepad-wasm-app/release/moly/makepad_platform
+              cp -v "$PLATFORM_DIR"/*.js target/makepad-wasm-app/release/moly/makepad_platform/ || true
+              cp -v "$PLATFORM_DIR"/*.css target/makepad-wasm-app/release/moly/makepad_platform/ || true
+            else
+              echo "ERROR: Could not find web_gl.js in makepad checkout"
+            fi
+            
+            # Wasm bridge files
+            BRIDGE_SRC=$(find makepad -name wasm_bridge.js -type f | head -n 1)
+            if [ -n "$BRIDGE_SRC" ]; then
+              BRIDGE_DIR=$(dirname "$BRIDGE_SRC")
+              echo "Found bridge source at $BRIDGE_DIR"
+              mkdir -p target/makepad-wasm-app/release/moly/makepad_wasm_bridge
+              cp -v "$BRIDGE_DIR"/*.js target/makepad-wasm-app/release/moly/makepad_wasm_bridge/ || true
+            else
+              echo "ERROR: Could not find wasm_bridge.js in makepad checkout"
+            fi
+          else
+            echo "Resources appear to be present."
+          fi
 
       - name: Add .nojekyll for GitHub Pages
         run: |
