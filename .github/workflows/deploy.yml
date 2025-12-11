@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - deploy-github-pages
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout moly repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Checkout makepad repository
+        uses: actions/checkout@v4
+        with:
+          repository: wyenox/makepad
+          ref: cargo-makepad-wasm-fix
+          path: makepad
+
+      - name: Install cargo-makepad
+        run: |
+          cargo install --path makepad/tools/cargo_makepad
+
+      - name: Build WASM app
+        run: |
+          cargo makepad wasm --bindgen build -p moly --release
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "target/makepad-wasm-app/release/moly"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
