@@ -86,6 +86,14 @@ jobs:
             echo "Resources appear to be present."
           fi
 
+      - name: Setup COI Service Worker
+        run: |
+          echo "Downloading coi-serviceworker..."
+          curl -o target/makepad-wasm-app/release/moly/coi-serviceworker.min.js https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.min.js
+
+          echo "Injecting script into index.html..."
+          sed -i 's|<head>|<head>\n    <script src="coi-serviceworker.min.js"></script>|' target/makepad-wasm-app/release/moly/index.html
+
       - name: Add .nojekyll for GitHub Pages
         run: |
           touch target/makepad-wasm-app/release/moly/.nojekyll
