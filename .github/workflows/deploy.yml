@@ -54,6 +54,11 @@ jobs:
         run: |
           touch target/makepad-wasm-app/release/moly/.nojekyll
 
+      - name: List build output
+        run: |
+          echo "=== Contents of target/makepad-wasm-app/release/moly ==="
+          ls -laR target/makepad-wasm-app/release/moly/ | head -100
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
