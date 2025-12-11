@@ -46,6 +46,13 @@ jobs:
         run: |
           cargo install --path makepad/tools/cargo_makepad
 
+      - name: Patch Cargo.toml to use local makepad
+        run: |
+          echo "" >> Cargo.toml
+          echo "[patch.'https://github.com/wyeworks/makepad']" >> Cargo.toml
+          echo "makepad-widgets = { path = 'makepad/widgets' }" >> Cargo.toml
+          echo "makepad-code-editor = { path = 'makepad/code_editor' }" >> Cargo.toml
+
       - name: Build WASM app
         run: |
           cargo makepad wasm --bindgen build -p moly --release
